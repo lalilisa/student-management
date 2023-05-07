@@ -36,7 +36,7 @@ public class Utils {
         if(base10 >= 8.45)
             return  3.7;
         if(base10 >= 7.95)
-            return 3.45;
+            return 3.5;
         if(base10 >= 6.95)
             return 3.0;
         if(base10 >= 6.45)
@@ -51,7 +51,7 @@ public class Utils {
     }
 
     public static Double caculateFinalExamPoint(Points points, Subject subject){
-        if(points.getCc()==null ||points.getCk()==null)
+        if(points==null || points.getCc()==null ||points.getCk()==null)
             return (double) 0;
         Double cc=points.getCc();
         Double bt= points.getBt();

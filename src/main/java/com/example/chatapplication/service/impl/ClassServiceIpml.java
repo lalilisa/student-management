@@ -32,6 +32,8 @@ public class ClassServiceIpml implements ClassService {
             Classes classes=classRepository.findById(idClass).orElse(null);
             Subject subject=subjectRepository.findById(classes.getSubjectId()).orElse(null);
             Points points=pointRepository.findByClassIdAndStudentId(classes.getId(),student.getId());
+            if(points==null)
+                points=new Points();
             Double base10=Utils.caculateFinalExamPoint(points,subject);
             Double base4=Utils.convertPointBase10ToBase4(base10);
             StudentPointResponse studentPointResponse= StudentPointResponse.builder()
@@ -48,7 +50,9 @@ public class ClassServiceIpml implements ClassService {
                     .build();
             studentPointResponse.setSubjectId(subject.getId());
             studentPointResponse.setClassCode(classes.getCode());
+            studentPointResponse.setClassId(classes.getId());
             studentPointResponse.setSubjectCode(subject.getCode());
+            studentPointResponse.setCredit(subject.getCredit());
             studentPointResponse.setSubjectName(subject.getName());
             studentPointResponse.setTerm(classes.getTerm());
             studentPointResponse.setSeason(classes.getSeason());

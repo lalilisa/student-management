@@ -86,6 +86,8 @@ public class AccountServiceIpml implements AccountService {
                                 .accountId(account.getId())
                                 .code(account.getUsername())
                                 .email(email)
+                                .role(Category.Role.STUDENT)
+                                .gender(1)
                                 .build();
         studentRepository.save(student);
     }
@@ -94,6 +96,8 @@ public class AccountServiceIpml implements AccountService {
                 .accountId(account.getId())
                 .code(account.getUsername())
                 .email(email)
+                .role(Category.Role.SUBJECT_TEACHER)
+                .gender(1)
                 .build();
         teacherRepository.save(teacher);
     }

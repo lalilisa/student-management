@@ -24,11 +24,14 @@ public class PointServiceIpml implements PointService {
 
     public StudentPointResponse updatePoint(Long classId, PointDto pointDto){
         Points point=pointRepository.findByClassIdAndStudentId(classId,pointDto.getStudentId());
-        point.setBt(pointDto.getCc()!=null?  pointDto.getCc():point.getCc());
+        System.out.println(point);
+        System.out.println(pointDto);
+        point.setCc(pointDto.getCc()!=null?  pointDto.getCc():point.getCc());
         point.setBt(pointDto.getBt()!=null?  pointDto.getBt():point.getBt());
-        point.setBt(pointDto.getKt()!=null?  pointDto.getKt():point.getKt());
-        point.setBt(pointDto.getTh()!=null?  pointDto.getTh():point.getTh());
-        point.setBt(pointDto.getCk()!=null?  pointDto.getCk():point.getCk());
+        point.setKt(pointDto.getKt()!=null?  pointDto.getKt():point.getKt());
+        point.setTh(pointDto.getTh()!=null?  pointDto.getTh():point.getTh());
+        point.setCk(pointDto.getCk()!=null?  pointDto.getCk():point.getCk());
+        System.out.println(point);
         Points newPoint= pointRepository.save(point);
         Student student=studentRepository.findById(pointDto.getStudentId()).orElse(null);
         Classes classes=classRepository.findById(point.getClassId()).orElse(null);
@@ -49,6 +52,8 @@ public class PointServiceIpml implements PointService {
                 .build();
         studentPointResponse.setSubjectId(subject.getId());
         studentPointResponse.setClassCode(classes.getCode());
+        studentPointResponse.setClassId(classes.getId());
+        studentPointResponse.setCredit(subject.getCredit());
         studentPointResponse.setSubjectCode(subject.getCode());
         studentPointResponse.setSubjectName(subject.getName());
         studentPointResponse.setTerm(classes.getTerm());

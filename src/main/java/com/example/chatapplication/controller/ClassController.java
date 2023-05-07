@@ -4,18 +4,12 @@ import com.example.chatapplication.anotation.IsAdmin;
 import com.example.chatapplication.anotation.IsTeacherClass;
 import com.example.chatapplication.common.Category;
 import com.example.chatapplication.custom.exception.GeneralException;
-import com.example.chatapplication.domain.Classes;
-import com.example.chatapplication.domain.Points;
-import com.example.chatapplication.domain.StudentClass;
-import com.example.chatapplication.domain.TeacherClass;
+import com.example.chatapplication.domain.*;
 import com.example.chatapplication.dto.request.ClassDto;
 import com.example.chatapplication.dto.request.StudentClassDto;
 import com.example.chatapplication.dto.request.TeacherClassDto;
 import com.example.chatapplication.dto.response.ResponseMessage;
-import com.example.chatapplication.repo.ClassRepository;
-import com.example.chatapplication.repo.PointRepository;
-import com.example.chatapplication.repo.StudentClassRepository;
-import com.example.chatapplication.repo.TeacherClassRepository;
+import com.example.chatapplication.repo.*;
 import com.example.chatapplication.service.ClassService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 
 
 @RestController
@@ -54,13 +49,17 @@ public class ClassController {
         return ResponseEntity.ok(classService.getStudentInClass(id));
     }
 
+    private final StudentRepository studentRepository;
     @Operation(description = "require role ADMIN",summary = "Thêm sinh viên vào 1 lớp học")
     @IsAdmin
     @Transactional
     @PostMapping("add-student-class")
     public ResponseEntity<?> addStudentForClass(@RequestBody StudentClassDto studentClassDto){
         StudentClass checkInClass=studentClassRepository.getStudentClassByClassIdAndStudentId(studentClassDto.getClassId(),studentClassDto.getStudentId());
-        if(checkInClass==null)
+        Student student=studentRepository.findById(studentClassDto.getStudentId()).orElse(null);
+        if(student==null)
+            throw new GeneralException(Category.ErrorCodeEnum.INVALID_FORMAT.name(),"Student is not exist");
+        if(checkInClass!=null)
             throw new GeneralException(Category.ErrorCodeEnum.INVALID_FORMAT.name(),"Student is added to this class");
         StudentClass studentClass =StudentClass
                                 .builder()
@@ -74,13 +73,19 @@ public class ClassController {
         pointRepository.save(points);
         return ResponseEntity.ok(ResponseMessage.builder().message("Add student success").build());
     }
+
+    private final TeacherRepository teacherRepository;
     @Operation(description = "require role ADMIN",summary = "Thêm giáo viên vào 1 lớp học")
     @IsAdmin
     @Transactional
     @PostMapping("add-teacher-class")
     public ResponseEntity<?> addTeacherForClass(@RequestBody TeacherClassDto teacherClassDto){
-        StudentClass checkInClass=studentClassRepository.getStudentClassByClassIdAndStudentId(teacherClassDto.getClassId(),teacherClassDto.getTeacherId());
-        if(checkInClass==null)
+        TeacherClass checkInClass=teacherClassRepository.getTeacherClassByClassIdAndTeacherId(teacherClassDto.getClassId(),teacherClassDto.getTeacherId());
+
+        Optional<Teacher> teacher=teacherRepository.findById(teacherClassDto.getTeacherId());
+        if(teacher.isEmpty())
+            throw new GeneralException(Category.ErrorCodeEnum.INVALID_FORMAT.name(),"Teacher is not exist");
+        if(checkInClass!=null)
             throw new GeneralException(Category.ErrorCodeEnum.INVALID_FORMAT.name(),"Teacher is added to this class");
         TeacherClass teacherClass =TeacherClass
                 .builder()
@@ -88,7 +93,7 @@ public class ClassController {
                 .teacherId(teacherClassDto.getTeacherId())
                 .build();
         teacherClassRepository.save(teacherClass);
-        return ResponseEntity.ok(ResponseMessage.builder().message("Add student success").build());
+        return ResponseEntity.ok(ResponseMessage.builder().message("Add Teacher success").build());
     }
 
     @Operation(description = "require role ADMIN",summary = "tạo lớp học")
@@ -113,13 +118,12 @@ public class ClassController {
         Classes oldClass=classRepository.findById(id).orElse(null);
         if(oldClass==null)
             throw new GeneralException(Category.ErrorCodeEnum.INVALID_PARAMETER.name(),"Not found classes");
-        Classes classes=Classes.builder()
-                .code(classDto.getCode()!=null ? classDto.getCode(): oldClass.getCode())
-                .season(classDto.getSeason()!=null ? classDto.getCode(): oldClass.getSeason())
-                .subjectId(classDto.getSubjectId()!=null ? classDto.getSubjectId(): oldClass.getSubjectId())
-                .term(classDto.getTerm()!=null ? classDto.getTerm(): oldClass.getTerm())
-                .build();
-        return ResponseEntity.ok(classRepository.save(classes));
+        oldClass.setCode(classDto.getCode()!=null ? classDto.getCode(): oldClass.getCode());
+        oldClass.setSeason(classDto.getSeason()!=null ? classDto.getCode(): oldClass.getSeason());
+        oldClass.setSubjectId(classDto.getSubjectId()!=null ? classDto.getSubjectId(): oldClass.getSubjectId());
+        oldClass.setTerm(classDto.getTerm()!=null ? classDto.getTerm(): oldClass.getTerm());
+
+        return ResponseEntity.ok(classRepository.save(oldClass));
 
     }
 

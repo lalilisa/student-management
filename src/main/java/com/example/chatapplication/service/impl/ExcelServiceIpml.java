@@ -53,7 +53,7 @@ public class ExcelServiceIpml implements ExcelService {
             row.createCell(0, CellType.STRING).setCellValue(i+1);
             row.createCell(1, CellType.STRING).setCellValue(student.getCode());
             row.createCell(2, CellType.STRING).setCellValue(student.getName());
-            row.createCell(3, CellType.STRING).setCellValue(simpleDateFormat.format(student.getDob()));
+            row.createCell(3, CellType.STRING).setCellValue(student.getDob()!=null ? simpleDateFormat.format(student.getDob()):null);
         }
         out =new ByteArrayOutputStream();
         workbook.write(out);
