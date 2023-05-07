@@ -85,7 +85,7 @@ public class TeacherController {
     public ResponseEntity<?> delete(@PathVariable Long id){
         ResponseMessage responseMessage=new ResponseMessage();
         try {
-            teacherRepository.deleteById(id);
+            accountRepository.deleteById(teacherRepository.findById(id).get().getAccountId());
             responseMessage.setMessage(Category.Status.SUCCESS.name());
         }
         catch (Exception e){

@@ -65,10 +65,12 @@ public class StudentController {
     public ResponseEntity<?> delete(@PathVariable Long id){
         ResponseMessage responseMessage=ResponseMessage.builder().build();
         try {
-            studentRepository.deleteById(id);
+            accountRepository.deleteById(studentRepository.findById(id).get().getAccountId());
+
             responseMessage.setMessage(Category.Status.SUCCESS.name());
         }
         catch (Exception e){
+            System.out.println(e);
             responseMessage.setMessage(Category.Status.FAIL.name());
         }
         return ResponseEntity.ok(responseMessage);

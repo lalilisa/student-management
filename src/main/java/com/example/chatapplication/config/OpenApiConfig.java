@@ -26,13 +26,13 @@ public class OpenApiConfig {
     @Value("http://localhost:8085")
     private String serverUrl;
 
-    @Value("Mu Store")
+    @Value("Student Management")
     private String serverDesc;
 
-    @Value("Mu Store")
+    @Value("Student Management")
     private String title;
 
-    @Value("Mu Store")
+    @Value("Student Management")
     private String description;
 
     @Value("3.0.0}")

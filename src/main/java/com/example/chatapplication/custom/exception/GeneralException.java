@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GeneralException extends RuntimeException {
+    protected Integer status;
     protected String code;
     protected Map<String, String> messageParams;
     protected Throwable source;
@@ -29,7 +30,6 @@ public class GeneralException extends RuntimeException {
         messageParams.put("content", errorContent);
         this.messageParams = messageParams;
     }
-
 
 
     public String getMessage() {

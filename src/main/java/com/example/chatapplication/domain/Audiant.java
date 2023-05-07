@@ -19,12 +19,12 @@ public abstract class Audiant {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
+    @CreationTimestamp
     protected Date createdAt;
 
 
     @Column(name = "updated_at")
-    @LastModifiedDate
+    @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     protected Date updatedAt;
 }

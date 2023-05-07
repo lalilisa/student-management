@@ -7,6 +7,7 @@ import com.example.chatapplication.common.Utils;
 import com.example.chatapplication.custom.exception.GeneralException;
 import com.example.chatapplication.domain.Account;
 import com.example.chatapplication.domain.Student;
+import com.example.chatapplication.domain.Teacher;
 import com.example.chatapplication.dto.request.ChangPasswordDto;
 import com.example.chatapplication.dto.request.CreateAccountDto;
 import com.example.chatapplication.dto.request.LoginRequest;
@@ -15,6 +16,7 @@ import com.example.chatapplication.dto.response.LoginResponse;
 import com.example.chatapplication.dto.response.ResponseMessage;
 import com.example.chatapplication.repo.AccountRepository;
 import com.example.chatapplication.repo.StudentRepository;
+import com.example.chatapplication.repo.TeacherRepository;
 import com.example.chatapplication.service.AccountService;
 import com.example.chatapplication.service.StudentService;
 import com.example.chatapplication.service.TeacherService;
@@ -85,6 +87,8 @@ public class AccountController {
     @Transactional
     @GetMapping ("me")
     public ResponseEntity<?> getMyInfo(Authentication authentication, HttpServletRequest request){
+        if(authentication==null)
+            throw new GeneralException(Category.ErrorCodeEnum.INVALID_FORMAT.name(),"Not Authenticated");
         UserDetails userDetails= (UserDetails) authentication.getPrincipal();
         List<GrantedAuthority> authorities=  userDetails.getAuthorities().stream().collect(Collectors.toList());
         String header=request.getHeader("Authorization");
@@ -99,20 +103,27 @@ public class AccountController {
         }
 
     }
+    private final TeacherRepository teacherRepository;
     @Operation(description = "Don't need login",summary = "Quên mật khẩu")
     @Transactional
     @PostMapping ("forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) throws MessagingException {
-        Student student=studentRepository.findStudentByEmail(email);
-        if(student==null)
-            return ResponseEntity.ok(ResponseMessage.builder().message("Vui lòng check Email của bạn").build());
+        Long accountId=null;
+        Teacher teacher=teacherRepository.findTeacherByEmail(email);
+        Student student = studentRepository.findStudentByEmail(email);
+        if(teacher!=null)
+             accountId=teacher.getAccountId();
+        if(student!=null)
+           accountId=student.getAccountId();
+        if(accountId==null)
+            return ResponseEntity.ok(ResponseMessage.builder().message("Email ko tồn tại trên hệ thống").build());
         String newPass=Utils.autogenPassword();
-        Account account = accountRepository.findById(student.getAccountId()).orElse(null);
+        Account account = accountRepository.findById(accountId).orElse(null);
         account.setPassword(Utils.hashPassword(newPass));
         accountRepository.save(account);
         MimeMessage mimeMessage=javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper =new MimeMessageHelper(mimeMessage,true);
-        mimeMessageHelper.setTo(student.getEmail());
+        mimeMessageHelper.setTo(email);
         mimeMessageHelper.setText(String.format("Mật khẩu mới của bạn là %s . Tuyệt đối không được cung cấp cho người khác", newPass));
         javaMailSender.send(mimeMessage);
         return ResponseEntity.ok(ResponseMessage.builder().message("Vui lòng check Email của bạn").build());
